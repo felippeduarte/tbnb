@@ -20,18 +20,36 @@ class QuoteController extends Controller
     }
 
     /**
-     * Upsert a quote
+     * Upsert quotes for a day
      *
      * @param  \App\Http\Requests\QuoteRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(QuoteRequest $request)
     {
-        $stock_id = Stock::whereSymbol($request->input('symbol'))->first()->id;
-        return response(Quote::updateOrCreate(
-                ['date' => $request->input('date'), 'stock_id' => $stock_id],            
-                $request->all()+ ['stock_id' => $stock_id]
-            ),200);
+        $data = $request->all();
+
+        $symbols = array_column($data['stocks'], 'symbol');
+        $stocks = Stock::whereIn('symbol',$symbols)->get()->pluck('id','symbol');
+
+        $quotes = collect($data['stocks'])->map(function($v, $k) use ($stocks, $data) {
+            return [
+                'stock_id' => $stocks[$v['symbol']],
+                'quote' => $v['quote'],
+                'date' => $data['date'],
+            ];
+        })->toArray();
+
+        try {
+            $upsert = Quote::upsert(
+                $quotes,
+                ['stock_id','date'],
+                ['quote']
+            );
+            return response($data, 200);
+        } catch(\Exception $e) {
+            abort(500);
+        }
     }
 
     /**

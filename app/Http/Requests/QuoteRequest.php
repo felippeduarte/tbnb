@@ -25,11 +25,15 @@ class QuoteRequest extends FormRequest
     public function rules()
     {
         return [
-            'quote' => 'required|numeric',
-            'symbol' => 'required|exists:App\Models\Stock,symbol',
+            'stocks.*.quote' => 'required|numeric',
+            'stocks.*.symbol' => [
+                'required',
+                Rule::in(\App\Models\Stock::select('symbol')->get()->pluck('symbol')),
+            ],
             'date' => [
                 'required',
                 'date',
+                'date_format:Y-m-d',
                 Rule::unique('quotes', 'stock_id')->ignore($this->id),
             ],
         ];
