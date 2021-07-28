@@ -3,25 +3,23 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Stock;
 
 class StockTest extends TestCase
 {
-    use WithFaker;
     use RefreshDatabase;
 
     public function testCreateShouldStoreNewSymbol()
     {
-        $symbol = $this->faker->lexify("????");
+        $symbol = 'TBNB';
         $data = [
             'symbol' => $symbol,
         ];
         $response = $this->postJson(route('stocks.store'), $data);
 
         $response->assertStatus(201)
-                 ->assertJson($data);
+                 ->assertExactJson($data);
         $this->assertDatabaseHas('stocks', $data);
     }
 
@@ -43,9 +41,20 @@ class StockTest extends TestCase
         $this->assertDatabaseMissing('stocks', $data);
     }
 
+    public function testCreateShouldFailWithSpacesInSymbol()
+    {
+        $symbol = "TB NB";
+        $data = [
+            'symbol' => $symbol,
+        ];
+        $response = $this->postJson(route('stocks.store'), $data);
+        $response->assertStatus(422);
+        $this->assertDatabaseMissing('stocks', $data);
+    }
+
     public function testCreateShouldFailWithTooLongSymbol()
     {
-        $symbol = $this->faker->regexify('[A-Z]{51}');
+        $symbol = "AVERYVERYLONGSYMBOLNAMETHATHASMORETHAN50CHARACTERSS";
         $data = [
             'symbol' => $symbol,
         ];
@@ -56,13 +65,11 @@ class StockTest extends TestCase
 
     public function testCreateShouldFailWithDuplicatedSymbol()
     {
-        $symbol = $this->faker->lexify("????");
+        //create a stock with same symbol to force the error on next request
+        $symbol = Stock::factory()->create()->symbol;
         $data = [
             'symbol' => $symbol,
         ];
-
-        //create a stock with same symbol to force the error on next request
-        Stock::factory()->create($data);
 
         $response = $this->postJson(route('stocks.store'), $data);
         $response->assertStatus(422);
@@ -70,18 +77,18 @@ class StockTest extends TestCase
 
     public function testDestroyShouldDeleteSymbol()
     {
-        $id = Stock::factory()->create()->id;
+        $symbol = Stock::factory()->create()->symbol;
 
-        $response = $this->deleteJson(route('stocks.destroy',$id));
+        $response = $this->deleteJson(route('stocks.destroy',$symbol));
         $response->assertStatus(200);
-        $this->assertDatabaseMissing('stocks', ['id' => $id]);
+        $this->assertDatabaseMissing('stocks', ['symbol' => $symbol]);
     }
 
-    public function testDestroyShouldWorkEvenWithNonExistingSymbol()
+    public function testDestroyShouldFailWithNonExistingSymbol()
     {
-        $id = Stock::max('id') + 1;
+        $symbol = 'MYNEWSYMBOL';
 
-        $response = $this->deleteJson(route('stocks.destroy',$id));
-        $response->assertStatus(200);
+        $response = $this->deleteJson(route('stocks.destroy',$symbol));
+        $response->assertStatus(404);
     }
 }

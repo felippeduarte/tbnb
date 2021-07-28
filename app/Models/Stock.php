@@ -10,6 +10,7 @@ class Stock extends Model
     use HasFactory;
 
     protected $fillable = ['symbol'];
+    protected $hidden = ['id','created_at','updated_at'];
 
     //uppercase symbol
     public function setSymbolAttribute($value)
