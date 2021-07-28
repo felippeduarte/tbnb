@@ -47,6 +47,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
         });
+
+        Route::bind('stock', function ($value) {
+            return \App\Models\Stock::whereSymbol($value)->firstOrFail();
+        });
     }
 
     /**

@@ -10,4 +10,10 @@ class Stock extends Model
     use HasFactory;
 
     protected $fillable = ['symbol'];
+
+    //uppercase symbol
+    public function setSymbolAttribute($value)
+    {
+        $this->attributes['symbol'] = strtoupper($value);
+    }
 }

@@ -15,13 +15,13 @@ class StockController extends Controller
      */
     public function index()
     {
-        //
+        return Stock::get();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StockRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(StockRequest $request)
@@ -32,22 +32,22 @@ class StockController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Stock  $stock
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Stock $stock)
     {
-        //
+        return $stock;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Stock  $stock
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Stock $stock)
     {
-        return Stock::destroy($id);
+        return $stock->delete();
     }
 }
