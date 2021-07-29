@@ -131,6 +131,15 @@ class QuoteTest extends TestCase
             'quote' => $data['stocks'][0]['quote'],
             'stock_id' => $stock->id,
         ]);
+
+        $data['date'] = \Carbon\Carbon::now()->addDays(1);
+        $response = $this->postJson(route('quotes.store'), $data);
+        $response->assertStatus(422);
+
+        $this->assertDatabaseMissing('quotes', [
+            'quote' => $data['stocks'][0]['quote'],
+            'stock_id' => $stock->id,
+        ]);
     }
 
     public function testStoreIncorrectQuoteShouldFail()

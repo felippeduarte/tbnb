@@ -34,6 +34,7 @@ class QuoteRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d',
+                'before_or_equal:today',
                 Rule::unique('quotes', 'stock_id')->ignore($this->id),
             ],
         ];
