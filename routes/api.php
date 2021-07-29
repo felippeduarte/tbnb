@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\SimulatedPriceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,4 @@ use App\Http\Controllers\QuoteController;
 
 Route::resource('stocks', StockController::class)->only(['index','show','store','destroy']);
 Route::resource('quotes', QuoteController::class)->only(['index','show','store']);
+Route::resource('simulatedPrice', SimulatedPriceController::class)->only(['index']);
