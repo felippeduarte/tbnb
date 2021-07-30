@@ -11,7 +11,11 @@ export default {
     data() {
         return {
             symbol: '',
-            chartData: {},
+            chartSymbols: [],
+            chartData: {
+                labels: [],
+                datasets: [],
+            },
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -26,7 +30,9 @@ export default {
         }
     },
     watch: {
-        '$route' (to, from) {
+        '$route' (to) {
+            console.log('watch route');
+            console.log(to);
             this.symbol = to.params.symbol;
             this.addToChart(this.symbol);
         }
@@ -36,18 +42,26 @@ export default {
         this.$root.$on("addToChart", symbol => {
             this.addToChart(symbol);
         });
+        this.$root.$on("newQuoteAdded", symbol => {
+            console.log('on newQuoteAdded');
+            console.log(symbol);
+            if (this.chartSymbols.includes(symbol)) {
+                this.removeFromChart(symbol);
+                this.addToChart(symbol);
+            }
+        });
         this.addToChart(this.symbol);
     },
     methods: {
         addToChart(symbol) {
             //if symbol already exists in chart, don't add again
-            if(this.chartData.datasets) {
-                if(this.chartData.datasets.find(d => d.label === symbol)) {
-                    return;
-                }
+            if(this.chartData.datasets.find(d => d.label === symbol)) {
+                return;
             }
             axios.get('/api/quotes?symbol='+symbol+'&limit='+this.limit)
                 .then(r => {
+                    //reverse resultset to append to chart
+                    r.data = r.data.reverse();
                     var datasets = [];
 
                     //populate dataset with existing info
@@ -57,9 +71,7 @@ export default {
 
                     //map data to chartjs format
                     var dates = r.data.map((d) => d.date);
-                    var quotes = r.data.map(function(d) {
-                        return d.quote;
-                    });
+                    var quotes = r.data.map((d) => d.quote);
 
                     //create new dataset from API data
                     var dataset = {
@@ -69,11 +81,6 @@ export default {
                         borderColor: this.availableChartColors[datasets.length],
                     };
 
-                    //merge X axis
-                    if(this.chartData.labels) {
-                        dates = [...new Set([...this.chartData.labels ,...dates])];
-                    }
-
                     //add new dataset
                     datasets.push(dataset);
 
@@ -82,10 +89,16 @@ export default {
                         labels: dates,
                         datasets: datasets,
                     };
+
+                    this.chartSymbols.push(symbol);
                 });
         },
         removeFromChart(symbol) {
-            debuger;
+            this.chartData = {
+                labels: this.chartData.labels,
+                datasets: this.chartData.datasets.filter((d) => d.label != symbol)
+            };
+            this.chartSymbols = this.chartSymbols.filter((d) => d != symbol);
         }
     }
 

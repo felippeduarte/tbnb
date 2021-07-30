@@ -23,7 +23,8 @@ class QuoteController extends Controller
             $quotes = Quote::select(['quote','date'])
                         ->whereHas('stock', function($q) use($symbol) {
                             $q->where('symbol',$symbol);
-                        });
+                        })
+                        ->orderBy('date','desc');
 
             if ((int)$request->has('limit')) {
                 $quotes = $quotes->take($request->input('limit'));

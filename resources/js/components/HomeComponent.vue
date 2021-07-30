@@ -17,7 +17,7 @@
                 <div class="col-md-9">
                     <router-view></router-view>
                 </div>
-                <div class="col-md-3 float-right">
+                <div class="col-md-3 float-right border-left">
                     <stocks-list></stocks-list>
                 </div>
             </div>

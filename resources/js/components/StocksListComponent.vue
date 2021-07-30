@@ -18,14 +18,22 @@
                         <span class="float-right">
                             <b-button variant="danger" @click="openDeleteStockModal(stock.symbol)"><i class="bi bi-trash"></i></b-button>
                         </span>
+                        <span class="float-right mr-2">
+                            <b-button variant="info" @click="openUpdateQuoteModal(stock.symbol)"><i class="bi bi-currency-dollar"></i></b-button>
+                        </span>
                     </li>
                 </ul>
             </div>
         </div>
         <b-modal id="modal-new-stock" title="New Stock">
-            Symbol: <input type="text" style="text-transform: uppercase" class="form-control" v-model="form.symbol" />
-            <span v-if="('symbol' in formErrors)" class="fa fa-warning form-control-feedback"></span>
-            <ul><li v-for="(e, i) in formErrors['symbol']" :key="i" class="error text-danger">{{ e }}</li></ul>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Symbol</label>
+                <div class="col-sm-10">
+                    <input type="text" style="text-transform: uppercase" class="form-control" v-model="formNew.symbol" />
+                    <span v-if="('symbol' in formErrors)" class="fa fa-warning form-control-feedback"></span>
+                    <ul><li v-for="(e, i) in formErrors['symbol']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                </div>
+            </div>
             <template #modal-footer>
                 <b-button
                     variant="success"
@@ -42,17 +50,51 @@
             </template>
         </b-modal>
         <b-modal id="modal-delete-stock" title="Delete Stock">
-            Are you sure you want to delete {{ symbolToDelete }}?
+            Are you sure you want to delete {{ activeSymbol }}?
             <template #modal-footer>
                 <b-button
                     variant="danger"
-                    @click="deleteStock(symbolToDelete)"
+                    @click="deleteStock(activeSymbol)"
                 >
                     Yes, delete it!
                 </b-button>
                 <b-button
                     variant="secondary"
                     @click="$bvModal.hide('modal-delete-stock')"
+                >
+                    Cancel
+                </b-button>
+            </template>
+        </b-modal>
+        <b-modal id="modal-update-quote" title="Update Quote">
+            <div class="form-group row">
+                <label class="col-sm-12 col-form-label">Symbol {{ activeSymbol }}</label>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Date</label>
+                <div class="col-sm-10">
+                    <b-form-datepicker v-model="formQuote.date" :max="maxQuoteDate" class="mb-2"></b-form-datepicker>
+                    <span v-if="('date' in formErrors)" class="fa fa-warning form-control-feedback"></span>
+                    <ul><li v-for="(e, i) in formErrors['date']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                </div>
+                <label class="col-sm-2 col-form-label">Quote</label>
+                <div class="col-sm-10">
+                    <b-form-input v-model="formQuote.quote" type="number"></b-form-input>
+                    <span v-if="('quote' in formErrors)" class="fa fa-warning form-control-feedback"></span>
+                    <ul><li v-for="(e, i) in formErrors['quote']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                </div>
+            </div>
+
+            <template #modal-footer>
+                <b-button
+                    variant="success"
+                    @click="updateQuote()"
+                >
+                    Save
+                </b-button>
+                <b-button
+                    variant="secondary"
+                    @click="$bvModal.hide('modal-update-quote')"
                 >
                     Cancel
                 </b-button>
@@ -65,12 +107,20 @@
 export default {
     data() {
         return {
-            symbolToDelete: '',
+            stockUrl: '/api/stocks/',
+            quoteUrl: '/api/quotes/',
+            activeSymbol: '',
             stocks: [],
             formErrors: [],
-            form: {
+            formNew: {
                 symbol: '',
-            }
+            },
+            formQuote: {
+                symbol: '',
+                date: '',
+                quote: '',
+            },
+            maxQuoteDate: new Date(),
         }
     },
     mounted() {
@@ -78,13 +128,13 @@ export default {
     },
     methods: {
         getStocks() {
-            axios.get('/api/stocks')
+            axios.get(this.stockUrl)
                 .then(r => {
                     this.stocks = r.data;
                 });
         },
         newStock() {
-            axios.post('/api/stocks', this.form)
+            axios.post(this.stockUrl, this.formNew)
                 .then((r) => {
                     this.$bvModal.hide("modal-new-stock");
                     this.$root.$emit('addAlertSuccess', 'Stock saved!');
@@ -95,13 +145,37 @@ export default {
                 });
         },
         openDeleteStockModal(symbol) {
-            this.symbolToDelete = symbol;
+            this.activeSymbol = symbol;
             this.$bvModal.show('modal-delete-stock');
         },
+        openUpdateQuoteModal(symbol) {
+            this.activeSymbol = symbol;
+            this.$bvModal.show('modal-update-quote');
+        },
         deleteStock(symbol) {
-            axios.delete('/api/stocks/'+symbol)
+            axios.delete(this.stockUrl+symbol)
                 .then(r => {
+                    this.$bvModal.hide("modal-delete-stock");
+                    this.$root.$emit('addAlertSuccess', 'Stock deleted!');
                     this.stocks = this.stocks.filter((s) => s.symbol != symbol);
+                });
+        },
+        updateQuote() {
+            var formQuote = {
+                date: this.formQuote.date,
+                stocks: [{
+                    symbol: this.activeSymbol,
+                    quote: this.formQuote.quote,
+                }]
+            }
+            axios.post(this.quoteUrl, formQuote)
+                .then((r) => {
+                    this.$bvModal.hide('modal-update-quote');
+                    this.$root.$emit('addAlertSuccess', 'Quote updated!');
+                    this.$root.$emit('newQuoteAdded', this.activeSymbol);
+                })
+                .catch((err) => {
+                    this.formErrors = err.response.data.errors;
                 });
         },
         addToChart(symbol) {
