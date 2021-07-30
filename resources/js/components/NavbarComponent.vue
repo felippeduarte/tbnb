@@ -8,7 +8,8 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Simulated Price</a>
+                        <router-link :to="{ name: 'simulatedPrice' }"> Simulated Price</router-link>
+                        <router-link :to="{ name: 'updateQuotes' }"> Update Quotes</router-link>
                     </li>
                 </ul>
             </div>

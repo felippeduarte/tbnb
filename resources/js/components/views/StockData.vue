@@ -1,6 +1,6 @@
 <template>
     <div>
-        <stock-chart v-if="chartData" :label="symbol" :chartData="chartData" :options="chartOptions"></stock-chart>
+        <stock-chart ref="stockChart" v-if="chartData" :label="symbol" :chartData="chartData" :options="chartOptions"></stock-chart>
     </div>
 </template>
 
@@ -19,6 +19,9 @@ export default {
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: false,
+                legend: {
+                    onClick:  this.clickChartHandler
+                }
             },
             limit: 30,
             availableChartColors: [
@@ -31,8 +34,6 @@ export default {
     },
     watch: {
         '$route' (to) {
-            console.log('watch route');
-            console.log(to);
             this.symbol = to.params.symbol;
             this.addToChart(this.symbol);
         }
@@ -43,8 +44,6 @@ export default {
             this.addToChart(symbol);
         });
         this.$root.$on("newQuoteAdded", symbol => {
-            console.log('on newQuoteAdded');
-            console.log(symbol);
             if (this.chartSymbols.includes(symbol)) {
                 this.removeFromChart(symbol);
                 this.addToChart(symbol);
@@ -99,6 +98,9 @@ export default {
                 datasets: this.chartData.datasets.filter((d) => d.label != symbol)
             };
             this.chartSymbols = this.chartSymbols.filter((d) => d != symbol);
+        },
+        clickChartHandler(event,legend) {
+            this.removeFromChart(legend.text);
         }
     }
 

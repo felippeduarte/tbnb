@@ -39,4 +39,15 @@ class QuoteRequest extends FormRequest
             ],
         ];
     }
+
+    public function messages()
+    {
+        //translate to a better info about the stock
+        return [
+            'stocks.*.quote.required' => "quote is required",
+            'stocks.*.quote.numeric' => ":input must be a number",
+            'stocks.*.symbol.required' => "symbol is required",
+            'stocks.*.symbol.in' => ":input doesn't exist",
+        ];
+    }
 }

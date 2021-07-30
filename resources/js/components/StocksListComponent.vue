@@ -13,7 +13,7 @@
                 <ul class="list-group">
                     <li class="list-group-item" v-for="stock in stocks" :key="stock.symbol">
                         <router-link :to="{ name: 'stockData', params: { symbol: stock.symbol } }">
-                            {{stock.symbol}} <i class="bi bi-box-arrow-up-left"></i>
+                            {{stock.symbol}}
                         </router-link>
                         <span class="float-right">
                             <b-button variant="danger" @click="openDeleteStockModal(stock.symbol)"><i class="bi bi-trash"></i></b-button>
@@ -30,8 +30,7 @@
                 <label class="col-sm-2 col-form-label">Symbol</label>
                 <div class="col-sm-10">
                     <input type="text" style="text-transform: uppercase" class="form-control" v-model="formNew.symbol" />
-                    <span v-if="('symbol' in formErrors)" class="fa fa-warning form-control-feedback"></span>
-                    <ul><li v-for="(e, i) in formErrors['symbol']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                    <ul v-if="('symbol' in formErrors)"><li v-for="(e, i) in formErrors['symbol']" :key="i" class="error text-danger">{{ e }}</li></ul>
                 </div>
             </div>
             <template #modal-footer>
@@ -74,14 +73,12 @@
                 <label class="col-sm-2 col-form-label">Date</label>
                 <div class="col-sm-10">
                     <b-form-datepicker v-model="formQuote.date" :max="maxQuoteDate" class="mb-2"></b-form-datepicker>
-                    <span v-if="('date' in formErrors)" class="fa fa-warning form-control-feedback"></span>
-                    <ul><li v-for="(e, i) in formErrors['date']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                    <ul v-if="('date' in formErrors)"><li v-for="(e, i) in formErrors['date']" :key="i" class="error text-danger">{{ e }}</li></ul>
                 </div>
                 <label class="col-sm-2 col-form-label">Quote</label>
                 <div class="col-sm-10">
                     <b-form-input v-model="formQuote.quote" type="number"></b-form-input>
-                    <span v-if="('quote' in formErrors)" class="fa fa-warning form-control-feedback"></span>
-                    <ul><li v-for="(e, i) in formErrors['quote']" :key="i" class="error text-danger">{{ e }}</li></ul>
+                    <ul v-if="('quote' in formErrors)"><li v-for="(e, i) in formErrors['quote']" :key="i" class="error text-danger">{{ e }}</li></ul>
                 </div>
             </div>
 
