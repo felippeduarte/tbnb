@@ -5,10 +5,52 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Stock;
+use App\Models\Quote;
 
 class QuoteTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function testIndexWithoutSymbolShouldReturn404()
+    {
+        $response = $this->getJson(route('quotes.index'));
+        $response->assertStatus(404);
+    }
+
+    public function testIndexWithLimitShouldGetLimitSymbolQuotes()
+    {
+        $symbol = "SYMBOL";
+        $limit = 2;
+        $stock = Stock::factory()->create(['symbol' => $symbol]);
+        $quotes = Quote::factory(2*$limit)->create(['stock_id' => $stock->id]);
+        
+        $response = $this->getJson(route('quotes.index', ['symbol' => $symbol, 'limit'=> $limit]));
+        
+        $response->assertStatus(200);
+        $response->assertJsonCount($limit);
+    }
+
+    public function testIndexWithSymbolShouldGetSymbolQuotes()
+    {
+        $symbol = "SYMBOL";
+        $stock = Stock::factory()->create(['symbol' => $symbol]);
+        $quotes = Quote::factory(10)->create(['stock_id' => $stock->id]);
+        $response = $this->getJson(route('quotes.index', ['symbol' => $symbol]));
+        
+        $response->assertStatus(200);
+        $response->assertJsonFragment(
+            [
+                'quote' => $quotes[0]->quote,
+                'date' => $quotes[0]->date,
+            ]
+        );
+        $response->assertJsonFragment(
+            [
+                'quote' => $quotes[9]->quote,
+                'date' => $quotes[9]->date,
+            ]
+        );
+    }
 
     public function testStoreNonExistentQuoteShouldWork()
     {

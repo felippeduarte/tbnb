@@ -48,6 +48,11 @@ class StockController extends Controller
      */
     public function destroy(Stock $stock)
     {
-        return $stock->delete();
+        \DB::beginTransaction();
+        $stock->quotes()->delete();
+        $stock->delete();
+        \DB::commit();
+
+        return true;
     }
 }

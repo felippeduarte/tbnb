@@ -10,13 +10,10 @@ class Quote extends Model
     use HasFactory;
 
     protected $fillable = ['date','quote','stock_id'];
-    protected $appends = ['symbol'];
     protected $hidden = ['id','stock','stock_id','timestamp','created_at','updated_at'];
-
-    public function getSymbolAttribute()
-    {
-        return $this->stock->symbol;
-    }
+    protected $casts = [
+        'quote' => 'decimal:2',
+    ];
 
     public function stock()
     {

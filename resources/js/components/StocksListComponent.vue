@@ -3,7 +3,12 @@
         Stocks <b-button class="btn btn-success text-right" v-b-modal.modal-new-stock><i class="bi bi-plus"></i> Add new</b-button>
         <ul class="list-group">
             <li class="list-group-item" v-for="stock in stocks" :key="stock.symbol">
-                {{stock.symbol}} <a href="#" v-on:click="deleteStock(stock.symbol)"><i class="bi bi-trash"></i></a>
+                <router-link :to="{ name: 'stockData', params: { symbol: stock.symbol } }">
+                    {{stock.symbol}} <i class="bi bi-box-arrow-up-left"></i>
+                </router-link>
+                <span class="float-right">
+                    <b-button variant="danger" @click="openDeleteStockModal(stock.symbol)"><i class="bi bi-trash"></i></b-button>
+                </span>
             </li>
         </ul>
         <b-modal id="modal-new-stock" title="New Stock">
@@ -13,17 +18,32 @@
             <template #modal-footer>
                 <b-button
                     variant="success"
-                    class="float-right"
                     @click="newStock()"
                 >
                     Save
                 </b-button>
                 <b-button
                     variant="secondary"
-                    class="float-right"
-                    @click="show=false"
+                    @click="$bvModal.hide('modal-new-stock')"
                 >
                     Close
+                </b-button>
+            </template>
+        </b-modal>
+        <b-modal id="modal-delete-stock" title="Delete Stock">
+            Are you sure you want to delete {{ symbolToDelete }}?
+            <template #modal-footer>
+                <b-button
+                    variant="danger"
+                    @click="deleteStock(symbolToDelete)"
+                >
+                    Yes, delete it!
+                </b-button>
+                <b-button
+                    variant="secondary"
+                    @click="$bvModal.hide('modal-delete-stock')"
+                >
+                    Cancel
                 </b-button>
             </template>
         </b-modal>
@@ -34,6 +54,7 @@
 export default {
     data() {
         return {
+            symbolToDelete: '',
             stocks: [],
             formErrors: [],
             form: {
@@ -61,11 +82,18 @@ export default {
                     this.formErrors = err.response.data.errors;
                 });
         },
+        openDeleteStockModal(symbol) {
+            this.symbolToDelete = symbol;
+            this.$bvModal.show('modal-delete-stock');
+        },
         deleteStock(symbol) {
             axios.delete('/api/stocks/'+symbol)
                 .then(r => {
                     this.stocks = this.stocks.filter((s) => s.symbol != symbol);
                 });
+        },
+        addToChart(symbol) {
+            this.$root.$emit('addToChart', symbol);
         },
     }
 

@@ -12,11 +12,29 @@ class QuoteController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->has('symbol')) {
+            $symbol = $request->input('symbol');
+
+            $quotes = Quote::select(['quote','date'])
+                        ->whereHas('stock', function($q) use($symbol) {
+                            $q->where('symbol',$symbol);
+                        });
+
+            if ((int)$request->has('limit')) {
+                $quotes = $quotes->take($request->input('limit'));
+            }
+            $quotes = $quotes->get();
+
+            if ($quotes) {
+                return $quotes;
+            }
+        }
+        abort(404);
     }
 
     /**

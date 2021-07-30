@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Stock;
+use App\Models\Quote;
 
 class StockTest extends TestCase
 {
@@ -82,6 +83,16 @@ class StockTest extends TestCase
         $response = $this->deleteJson(route('stocks.destroy',$symbol));
         $response->assertStatus(200);
         $this->assertDatabaseMissing('stocks', ['symbol' => $symbol]);
+    }
+    
+    public function testDestroyShouldDeleteSymbolWithQuotes()
+    {
+        $stock = Stock::factory()->create();
+        Quote::factory(1)->create(['stock_id'=>$stock->id]);
+
+        $response = $this->deleteJson(route('stocks.destroy',$stock->symbol));
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('stocks', ['symbol' => $stock->symbol]);
     }
 
     public function testDestroyShouldFailWithNonExistingSymbol()
