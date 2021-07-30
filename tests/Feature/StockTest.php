@@ -13,7 +13,7 @@ class StockTest extends TestCase
 
     public function testCreateShouldStoreNewSymbol()
     {
-        $symbol = 'TBNB';
+        $symbol = 'TBN.-B';
         $data = [
             'symbol' => $symbol,
         ];
