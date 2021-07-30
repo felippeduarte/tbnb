@@ -53,7 +53,7 @@ class SimulatedPriceService
 
             $lastQuotes[] = [
                 'symbol' => $q->symbol,
-                'simulatedPrice' => $q->price + $randomSimulatedValue,
+                'simulatedPrice' => round($q->price + $randomSimulatedValue,2),
             ];
         }
 
