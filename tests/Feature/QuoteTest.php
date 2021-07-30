@@ -207,7 +207,6 @@ class QuoteTest extends TestCase
         $response->assertStatus(422);
 
         $this->assertDatabaseMissing('quotes', [
-            'quote' => $data['stocks'][0]['quote'],
             'stock_id' => $stock->id,
         ]);
     }

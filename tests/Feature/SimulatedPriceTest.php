@@ -19,8 +19,8 @@ class SimulatedPriceTest extends TestCase
         $fastPeriod = SimulatedPriceService::SMA_FAST_PERIOD;
         $slowPeriod = SimulatedPriceService::SMA_SLOW_PERIOD;
 
-        $stock1 = Stock::factory()->create();
-        $stock2 = Stock::factory()->create();
+        $stock1 = Stock::factory()->create(['symbol' => 'AA']);
+        $stock2 = Stock::factory()->create(['symbol' => 'BB']);
         $date = Carbon::now()->subDays($slowPeriod);
 
         //insert some data
