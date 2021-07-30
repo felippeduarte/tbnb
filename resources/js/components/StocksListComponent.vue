@@ -5,7 +5,7 @@
                 <i class="bi bi-list-ul"></i> Stocks
             </div>
             <div class="col-6 text-right">
-                <b-button class="btn btn-success" v-b-modal.modal-new-stock><i class="bi bi-plus"></i> Add new</b-button>
+                <b-button class="btn btn-success" @click="openNewStockModal()"><i class="bi bi-plus"></i> Add new</b-button>
             </div>
         </div>
         <div class="row">
@@ -140,6 +140,11 @@ export default {
                 .catch((err) => {
                     this.formErrors = err.response.data.errors;
                 });
+        },
+        openNewStockModal() {
+            this.formErrors = {};
+            this.formNew.symbol = '';
+            this.$bvModal.show('modal-new-stock');
         },
         openDeleteStockModal(symbol) {
             this.activeSymbol = symbol;

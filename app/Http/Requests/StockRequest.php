@@ -24,7 +24,7 @@ class StockRequest extends FormRequest
     public function rules()
     {
         return [
-            'symbol' => 'required|unique:stocks|regex:/^[A-Z0-9_\.\-]+$/|max:50',
+            'symbol' => 'required|unique:stocks|regex:/^[a-zA-Z0-9_\.\-]+$/|max:50',
         ];
     }
 }
